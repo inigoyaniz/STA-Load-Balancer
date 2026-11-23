@@ -12,6 +12,8 @@ export default class LoadBalancer {
     //   activeProgress: 0.25 // Progreso de 0 a 1 (0 si está libre)
     // }
     // Los datos son de solo lectura y se actualizan durante la simulación.
+    this.index = 0;
+    this.max = servers.length - 1 ;
     this.servers = Object.freeze([...servers]);
   }
 
@@ -22,7 +24,12 @@ export default class LoadBalancer {
     //   payload: "08319462", // Datos que envía el cliente
     //   work: 4              // Unidades de trabajo necesarias
     // }
-    const server = this.servers[0];
+    const server = this.servers[this.index++];
+    if (this.index > this.max){
+      this.index = 0;
+
+ 
+    }
 
     // Envía la petición al servidor y devuelve su respuesta al cliente.
     return sendToServer(server.id);
