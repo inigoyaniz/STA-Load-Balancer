@@ -12,9 +12,9 @@ export default class LoadBalancer {
     //   activeProgress: 0.25 // Progreso de 0 a 1 (0 si está libre)
     // }
     // Los datos son de solo lectura y se actualizan durante la simulación.
-    this.servers = servers;
     this.index = 0;
-    this.max = servers.length - 1 ;
+    this.max = servers.length ;
+    
     this.servers = Object.freeze([...servers]);
   }
 
@@ -25,20 +25,29 @@ export default class LoadBalancer {
     //   payload: "08319462", // Datos que envía el cliente
     //   work: 4              // Unidades de trabajo necesarias
     // }
+  let mejor = this.servers[0];
+
+  for (let i = 0; i <this.max; i++) {
+    const servidor = this.servers[i];
   
-    this.servers.sort((a, b) => b.power - a.power);
-    while (this.index == this.max) {
-    for (let i = 0; i < this.max; i++) {
-      const server = this.servers[i];
+    let cola =servidor.queuedRequests.length + 1;
+
+    if(servidor.activeRequest){
+      cola = cola + servidor.activeRequest.work;
     }
-    this.max = this.max - 1;
+    // Ordena los servidores por potencia y selecciona el primero disponible.
+    let probando = mejor.queuedRequests.length + 1;
+    if(mejor.activeRequest){
+      probando = probando + mejor.activeRequest.work;
+    }
 
+    if(cola < probando){
+      mejor = servidor;
+    }
+  
   }
-
-   
-
-
     // Envía la petición al servidor y devuelve su respuesta al cliente.
-    return sendToServer(server.id);
+    return sendToServer(mejor.id);
   }
-}
+  }
+
